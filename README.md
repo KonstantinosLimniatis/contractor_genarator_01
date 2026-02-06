@@ -23,7 +23,9 @@ cd /home/konstantinos/contract_generator
 ```bash
 python generate_contract_demo.py
 ```
-Παράγει `contracts/contract_filled.docx`.
+Παράγει:
+- `contracts/contract_filled.docx`
+- `contracts/contract_filled.pdf` (μέσω LibreOffice)
 
 Μετατροπή σε PDF:
 ```bash
