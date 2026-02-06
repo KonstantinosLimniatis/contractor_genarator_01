@@ -4,13 +4,13 @@
 
 ## Απαιτήσεις
 - Python 3
-- `pandoc` και LaTeX engine (`xelatex`) για τη μετατροπή σε PDF
+- LibreOffice (για μετατροπή σε PDF)
 
 ## Εγκατάσταση
 1) Δημιούργησε/ενεργοποίησε virtual env.
 2) Εγκατέστησε τις βιβλιοθήκες:
 ```bash
-pip install docxtpl pypandoc python-docx
+pip install docxtpl python-docx
 ```
 
 ## Εκτέλεση από το τερματικό

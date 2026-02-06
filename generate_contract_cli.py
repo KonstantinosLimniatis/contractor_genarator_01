@@ -1,6 +1,8 @@
 from docxtpl import DocxTemplate
 from datetime import datetime
-import pypandoc
+import os
+import shutil
+import subprocess
 
 
 # =========================
@@ -46,12 +48,34 @@ def ask(prompt, validator=None, error_msg="Λάθος τιμή"):
 # =========================
 
 def convert_to_pdf(docx_file: str, pdf_file: str):
-    pypandoc.convert_file(
-        docx_file,
-        "pdf",
-        outputfile=pdf_file,
-        extra_args=["--pdf-engine=xelatex"]
+    if shutil.which("libreoffice") is None:
+        raise RuntimeError("Δεν βρέθηκε το libreoffice στο PATH")
+
+    output_dir = os.path.dirname(pdf_file) or "."
+    os.makedirs(output_dir, exist_ok=True)
+
+    subprocess.run(
+        [
+            "libreoffice",
+            "--headless",
+            "--convert-to",
+            "pdf",
+            "--outdir",
+            output_dir,
+            docx_file,
+        ],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     )
+
+    expected_pdf = os.path.join(
+        output_dir,
+        os.path.splitext(os.path.basename(docx_file))[0] + ".pdf",
+    )
+    if expected_pdf != pdf_file and os.path.exists(expected_pdf):
+        os.replace(expected_pdf, pdf_file)
 
 
 # =========================
@@ -136,8 +160,10 @@ def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_name = context["onoma_didaskontos"].replace(" ", "_")
 
-    docx_filename = f"contract_{timestamp}_{safe_name}.docx"
-    pdf_filename = f"contract_{timestamp}_{safe_name}.pdf"
+    output_dir = "contracts"
+    os.makedirs(output_dir, exist_ok=True)
+    docx_filename = os.path.join(output_dir, f"contract_{timestamp}_{safe_name}.docx")
+    pdf_filename = os.path.join(output_dir, f"contract_{timestamp}_{safe_name}.pdf")
 
     # =========================
     # GENERATION

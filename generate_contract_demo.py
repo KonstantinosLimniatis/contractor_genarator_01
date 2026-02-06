@@ -1,4 +1,38 @@
 from docxtpl import DocxTemplate
+import os
+import shutil
+import subprocess
+
+
+def convert_to_pdf(docx_file: str, pdf_file: str):
+    if shutil.which("libreoffice") is None:
+        raise RuntimeError("Δεν βρέθηκε το libreoffice στο PATH")
+
+    output_dir = os.path.dirname(pdf_file) or "."
+    os.makedirs(output_dir, exist_ok=True)
+
+    subprocess.run(
+        [
+            "libreoffice",
+            "--headless",
+            "--convert-to",
+            "pdf",
+            "--outdir",
+            output_dir,
+            docx_file,
+        ],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+
+    expected_pdf = os.path.join(
+        output_dir,
+        os.path.splitext(os.path.basename(docx_file))[0] + ".pdf",
+    )
+    if expected_pdf != pdf_file and os.path.exists(expected_pdf):
+        os.replace(expected_pdf, pdf_file)
 
 doc = DocxTemplate("template.docx")
 
@@ -47,7 +81,16 @@ context = {
     "imerominia_lixis": "31/01/2026",
 }
 
+output_dir = "contracts"
+os.makedirs(output_dir, exist_ok=True)
+
 doc.render(context)
-doc.save("contract_filled.docx")
+
+docx_filename = os.path.join(output_dir, "contract_filled.docx")
+pdf_filename = os.path.join(output_dir, "contract_filled.pdf")
+
+doc.save(docx_filename)
+convert_to_pdf(docx_filename, pdf_filename)
 
 print("OK: δημιουργήθηκε πλήρως συμπληρωμένη σύμβαση")
+print(f"OK: δημιουργήθηκε το {pdf_filename}")
